@@ -1,0 +1,11 @@
+- name: Hello World Sample
+  hosts: all
+  tasks:
+#    - name: "Echo hello string"
+#      shell: echo "{{ ipaddress_master }}" "{{ hostname_master }}">> ~/echo.txt
+#    - name: Hello IP
+#      debug:
+#        msg: "Hello {{ ipaddress_master }} {{ hostname_master }} "
+    - name: Hello hostname
+      debug:
+        msg: "Hello {{ vm_name }} "
