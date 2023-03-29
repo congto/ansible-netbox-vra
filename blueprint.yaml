@@ -18,22 +18,6 @@ inputs:
     minLength: 8
     maxLength: 20
 resources:
-  Awx2:
-    type: Cloud.Ansible.Tower
-    properties:
-      host: ${resource.Cloud_Machine_1.*}
-      hostname: localhost
-      account: ansibleawx
-      templates:
-        provision:
-          - name: hello
-          - name: vra-netbox-add-vm
-      hostVariables: # ansible_host: ${resource.Cloud_Machine_1.resourceName}
-        vm_cluster: my_vm_cluster
-        vm_name: ${input.hostname}
-        vm_role: Virtual Machine
-        vm_interface: ens160
-        vm_address: ${resource.Cloud_Machine_1.networks.address[0]}/${resource.Cloud_Network_1.prefixLength}
   Cloud_Network_1:
     type: Cloud.vSphere.Network
     properties:
@@ -41,6 +25,10 @@ resources:
       name: network2
       constraints:
         - tag: net:vlan21
+  Cloud_vSphere_Disk_1:
+    type: Cloud.vSphere.Disk
+    properties:
+      capacityGb: 100
   Cloud_Machine_1:
     type: Cloud.vSphere.Machine
     properties:
@@ -76,7 +64,19 @@ resources:
                   address: ${resource.Cloud_Machine_1.networks.address[0]}/${resource.Cloud_Network_1.prefixLength}
                   gateway: ${resource.Cloud_Network_1.gateway}
                   
-  Cloud_vSphere_Disk_1:
-    type: Cloud.vSphere.Disk
+  Awx2:
+    type: Cloud.Ansible.Tower
     properties:
-      capacityGb: 100
+      host: ${resource.Cloud_Machine_1.*}
+      hostname: localhost
+      account: ansibleawx
+      templates:
+        provision:
+          - name: hello
+          - name: vra-netbox-add-vm
+      hostVariables: # ansible_host: ${resource.Cloud_Machine_1.resourceName}
+        vm_cluster: my_vm_cluster
+        vm_name: ${input.hostname}
+        vm_role: Virtual Machine
+        vm_interface: ens160
+        vm_address: ${resource.Cloud_Machine_1.networks.address[0]}/${resource.Cloud_Network_1.prefixLength}
