@@ -74,7 +74,8 @@ resources:
         provision:
           - name: hello
           - name: vra-netbox-add-vm
-      hostVariables: # ansible_host: ${resource.Cloud_Machine_1.resourceName}
+      hostVariables: 
+        #ansible_host: ${resource.Cloud_Machine_1.resourceName}
         vm_cluster: my_vm_cluster
         vm_name: ${input.hostname}
         vm_role: Virtual Machine
