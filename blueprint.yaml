@@ -1,0 +1,82 @@
+formatVersion: 1
+inputs:
+  hostname:
+    type: string
+    title: Host name
+    maxLength: 32
+    minLength: 4
+    pattern: ^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$
+  user:
+    type: string
+    title: User
+    minLength: 4
+    pattern: ^[A-Za-z0-9]+(?:[ _-][A-Za-z0-9]+)*$
+  password:
+    type: string
+    title: Password
+    encrypted: true
+    minLength: 8
+    maxLength: 20
+resources:
+  Awx2:
+    type: Cloud.Ansible.Tower
+    properties:
+      host: ${resource.Cloud_Machine_1.*}
+      hostname: localhost
+      account: ansibleawx
+      templates:
+        provision:
+          - name: hello
+          - name: vra-netbox-add-vm
+      hostVariables: # ansible_host: ${resource.Cloud_Machine_1.resourceName}
+        vm_cluster: my_vm_cluster
+        vm_name: ${input.hostname}
+        vm_role: Virtual Machine
+        vm_interface: ens160
+        vm_address: ${resource.Cloud_Machine_1.networks.address[0]}/${resource.Cloud_Network_1.prefixLength}
+  Cloud_Network_1:
+    type: Cloud.vSphere.Network
+    properties:
+      networkType: existing
+      name: network2
+      constraints:
+        - tag: net:vlan21
+  Cloud_Machine_1:
+    type: Cloud.vSphere.Machine
+    properties:
+      image: U20
+      cpuCount: 2
+      totalMemoryMB: 2048
+      attachedDisks:
+        - source: ${resource.Cloud_vSphere_Disk_1.id}
+      networks:
+        - network: ${resource.Cloud_Network_1.id}
+          assignment: static
+      cloudConfig: |
+        users:
+          - name: '${input.user}'
+            sudo:
+              - 'ALL=(ALL) NOPASSWD:ALL'
+            groups: sudo
+            shell: /bin/bash
+        runcmd:
+          - mkdir -p /tmp/test
+          - echo "Thaonv test" > /tmp/test/test.txt
+          - 'hostnamectl set-hostname ${input.hostname}'
+          - 'USER=${input.user}'
+          - 'PASS=${input.password}'
+          - 'echo $USER:$PASS | /usr/sbin/chpasswd'
+        network:
+          version: 1
+          config:
+            - type: physical
+              name: ens160
+              subnets: 
+                - type: static
+                  address: ${resource.Cloud_Machine_1.networks.address[0]}/${resource.Cloud_Network_1.prefixLength}
+                  gateway: ${resource.Cloud_Network_1.gateway}
+                  
+  Cloud_vSphere_Disk_1:
+    type: Cloud.vSphere.Disk
+    properties:
+      capacityGb: 100
