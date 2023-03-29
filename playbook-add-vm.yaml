@@ -1,6 +1,6 @@
 ---
 - name: Tao vm - ip tren netbox
-- hosts: all
+  hosts: all
   gather_facts: false
   connection: local
 
